@@ -25,8 +25,9 @@ public class FcmPluginInstanceIdService extends Service {
         // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.i(TAG, "Refreshed token: " + refreshedToken);
-        FcmPlugin.sInstance.setToken(refreshedToken);
-        FcmPlugin.sInstance.onTokenReceived();
+        FcmPlugin.getInstance().setToken(refreshedToken);
+        FcmPlugin.getInstance().onTokenReceived();
+        
     }
 
 }

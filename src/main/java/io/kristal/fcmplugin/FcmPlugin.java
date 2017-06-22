@@ -45,31 +45,52 @@ public class FcmPlugin extends CobaltAbstractPlugin {
     /*******************************************************************************************************
      * MEMBERS ACCESSIBILITY
      *******************************************************************************************************/
-    protected void setToken(String token){
-        this.token = token;
-    }
+    protected void setToken(String token) { this.token = token;}
+    protected String getToken(){ return this.token;}
+
     protected Context getContext() { return this.context; }
+    public void setContext(Context context){this.context = context;}
+
+    void setFragment(CobaltFragment fragment){ this.fragment = new WeakReference<CobaltFragment>(fragment); }
+    CobaltFragment getFragment(){ return this.fragment.get(); }
+
+    void setCallback(String callback) { this.callback = callback; }
+    String getCallback(){ return this.callback; }
+
 
     /*******************************************************************************************************
      * SINGLETON
      *******************************************************************************************************/
     protected static FcmPlugin sInstance;
 
-    public static CobaltAbstractPlugin getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new FcmPlugin(context);
+    public static FcmPlugin getInstance(){
+        if (sInstance == null){
+            sInstance = new FcmPlugin();
         }
-
         return sInstance;
     }
-    private FcmPlugin(Context context){
-        // Token is null at start
+
+    // getInstance used by the CobaltPluginManager
+    public static FcmPlugin getInstance(CobaltPluginWebContainer webContainer){
+        if (sInstance == null){
+            sInstance = new FcmPlugin(webContainer);
+        }
+        return sInstance;
+    }
+
+    private FcmPlugin(){
         this.token = FirebaseInstanceId.getInstance().getToken(); //Null if token not yet generated, device token else
         this.callback = null;
         this.fragment = new WeakReference<CobaltFragment>(null);
-        this.context = context;
+        this.context = null;
     }
 
+    private FcmPlugin(CobaltPluginWebContainer webContainer){
+        this.token = FirebaseInstanceId.getInstance().getToken(); //Null if token not yet generated, device token else
+        this.callback = null;
+        this.fragment = new WeakReference<CobaltFragment>(null);
+        this.context = webContainer.getActivity();
+    }
 
     /*******************************************************************************************************
      * PLUGIN'S ACTIONS MANAGEMENT
@@ -81,13 +102,13 @@ public class FcmPlugin extends CobaltAbstractPlugin {
             CobaltFragment fragment = webContainer.getFragment();
             String callback = message.getString(Cobalt.kJSCallback);
 
-            if (action.equals(EVENT_GETTOKEN)){
-                FcmPlugin.sInstance.fragment = new WeakReference<CobaltFragment>(fragment);
-                FcmPlugin.sInstance.callback = callback;
-                FcmPlugin.sInstance.onTokenReceived();
+            if (EVENT_GETTOKEN.equals(action)){
+                FcmPlugin.getInstance().setFragment(fragment);
+                FcmPlugin.getInstance().setCallback(callback);
+                FcmPlugin.getInstance().onTokenReceived();
             }
 
-            else if (action.equals(EVENT_SUBSCRIBE)){
+            else if (EVENT_SUBSCRIBE.equals(action)){
                 JSONObject data = message.getJSONObject(Cobalt.kJSData);
                 String topic = data.getString(KEY_TOPIC);
 
@@ -97,7 +118,7 @@ public class FcmPlugin extends CobaltAbstractPlugin {
                 }
             }
 
-            else if (action.equals(EVENT_UNSUBSCRIBE)){
+            else if (EVENT_UNSUBSCRIBE.equals(action)){
                 JSONObject data = message.getJSONObject(Cobalt.kJSData);
                 String topic = data.getString(KEY_TOPIC);
 
@@ -120,14 +141,17 @@ public class FcmPlugin extends CobaltAbstractPlugin {
      * TOKEN MANAGEMENT
      *******************************************************************************************************/
     protected void onTokenReceived(){
-        if (FcmPlugin.sInstance.token != null && FcmPlugin.sInstance.callback != null && FcmPlugin.sInstance.fragment.get() != null){ //An event getToken was caught
+        CobaltFragment frag = FcmPlugin.getInstance().getFragment();
+        if (FcmPlugin.getInstance().getToken() != null &&
+                FcmPlugin.getInstance().getCallback() != null &&
+                frag != null){
 
             JSONObject data = new JSONObject();
             try{
                 data.put(KEY_TOKEN, FcmPlugin.sInstance.token);
-                FcmPlugin.sInstance.fragment.get().sendCallback(FcmPlugin.sInstance.callback, data);
-                FcmPlugin.sInstance.callback = null;
-                FcmPlugin.sInstance.fragment = null;
+                frag.sendCallback(FcmPlugin.getInstance().getCallback(), data);
+                FcmPlugin.getInstance().setCallback(null);
+                FcmPlugin.getInstance().setFragment(null);
             }
             catch (JSONException e){
                 if (Cobalt.DEBUG){
@@ -143,7 +167,9 @@ public class FcmPlugin extends CobaltAbstractPlugin {
      * INTERFACE BETWEEN APP AND FCM
      *******************************************************************************************************/
     public static void onMessageReceived(RemoteMessage remoteMessage){
-        FcmPluginMessagingService.onMessageReceived(remoteMessage, FcmPlugin.sInstance.context);
+        if (FcmPlugin.getInstance().getContext() != null){
+            FcmPluginMessagingService.onMessageReceived(remoteMessage, FcmPlugin.getInstance().getContext());
+        }
     }
 
     public static void onTokenRefresh(){

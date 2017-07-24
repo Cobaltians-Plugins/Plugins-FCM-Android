@@ -111,7 +111,6 @@ public class FcmPlugin extends CobaltAbstractPlugin {
             else if (EVENT_SUBSCRIBE.equals(action)){
                 JSONObject data = message.getJSONObject(Cobalt.kJSData);
                 String topic = data.getString(KEY_TOPIC);
-                topic = "/topics/" + topic;
 
                 FirebaseMessaging.getInstance().subscribeToTopic(topic);
                 if (callback != null) {
@@ -122,7 +121,6 @@ public class FcmPlugin extends CobaltAbstractPlugin {
             else if (EVENT_UNSUBSCRIBE.equals(action)){
                 JSONObject data = message.getJSONObject(Cobalt.kJSData);
                 String topic = data.getString(KEY_TOPIC);
-                topic = "/topics/" + topic;
 
                 FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
                 if (callback != null) {

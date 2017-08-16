@@ -2,6 +2,8 @@ package io.kristal.fcmplugin;
 
 import android.content.Context;
 import android.util.Log;
+import android.app.Notification;
+
 
 import org.cobaltians.cobalt.Cobalt;
 import org.cobaltians.cobalt.fragments.CobaltFragment;

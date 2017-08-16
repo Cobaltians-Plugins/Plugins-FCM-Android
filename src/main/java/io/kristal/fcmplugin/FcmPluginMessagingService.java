@@ -81,9 +81,14 @@ public class FcmPluginMessagingService extends Service{
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void onMessageReceived(Notification notif, Context context) {
+        NotificationManager mNotificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
 
-
+        mNotificationManager.notify(0, notif);
     }
 
 }

@@ -72,6 +72,13 @@ public class FcmPlugin extends CobaltAbstractPlugin {
         return sInstance;
     }
 
+    public static FcmPlugin getInstance(Context context){
+        if (sInstance == null){
+            sInstance = new FcmPlugin(context);
+        }
+        return sInstance;
+    }
+
     // getInstance used by the CobaltPluginManager
     public static FcmPlugin getInstance(CobaltPluginWebContainer webContainer){
         if (sInstance == null){
@@ -85,6 +92,13 @@ public class FcmPlugin extends CobaltAbstractPlugin {
         this.callback = null;
         this.fragment = new WeakReference<CobaltFragment>(null);
         this.context = null;
+    }
+
+    private FcmPlugin(Context context){
+        this.token = FirebaseInstanceId.getInstance().getToken(); //Null if token not yet generated, device token else
+        this.callback = null;
+        this.fragment = new WeakReference<CobaltFragment>(null);
+        this.context = context;
     }
 
     private FcmPlugin(CobaltPluginWebContainer webContainer){

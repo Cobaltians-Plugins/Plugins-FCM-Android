@@ -83,12 +83,12 @@ public class FcmPluginMessagingService extends Service{
         }
     }
 
-    public static void onMessageReceived(Notification notif, Context context) {
+    public static void onMessageReceived(int id, Notification notif, Context context) {
         NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
 
-        mNotificationManager.notify(0, notif);
+        mNotificationManager.notify(id, notif);
     }
 
 }

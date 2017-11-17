@@ -176,7 +176,13 @@ public class FcmPlugin extends CobaltAbstractPlugin {
 
     public static void onMessageReceived(Notification notif) {
         if (FcmPlugin.getInstance().getContext() != null){
-            FcmPluginMessagingService.onMessageReceived(notif, FcmPlugin.getInstance().getContext());
+            FcmPluginMessagingService.onMessageReceived(0, notif, FcmPlugin.getInstance().getContext());
+        }
+    }
+
+    public static void onMessageReceived(int id, Notification notif) {
+        if (FcmPlugin.getInstance().getContext() != null){
+            FcmPluginMessagingService.onMessageReceived(id, notif, FcmPlugin.getInstance().getContext());
         }
     }
 
